@@ -68,7 +68,10 @@ head(unite_meta)
 names(unite_meta)
 #picked up on line 142
 
-#Estimate 
+#Estimate
+install.packages("Rtsne")
+install.packages("rsvd")
+install.packages("geometry")
 library (Rtsne)
 library(rsvd)
 library(geometry)
@@ -106,8 +109,18 @@ hist(unite_analysis$created_at, breaks ="min", freq = TRUE,
 #here whether the account is verified
 #unite_fit2 will use k=74 from above, but addes whether user is verified and time
 #as covariates 
-unite_fit2 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=74, 
-                  prevalence =~ unite_meta$created_at + unite_meta$verified,  
+
+head(unite_meta$created_at)
+head(unite_meta$verified)
+#convert verified to false = 0, true = 1) 
+unite_meta$verified [unite_meta$verified == "TRUE"] <- 1
+unite_meta$verified [unite_meta$verified == "FALSE"] <- 0
+unite_meta$verified <- as.integer(unite_meta$verified)
+head(unite_meta$verified)
+table(unite_meta$verified)
+
+unite_fit2 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=5, 
+                  prevalence =~ unite_meta$created_at + unite_meta$verified, max.em.its = 10,  
                   data = unite_out$meta, init.type = "Spectral")
 
 #Evaluate
