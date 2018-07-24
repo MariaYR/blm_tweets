@@ -100,6 +100,20 @@ unite_analysis$created_at <- as.POSIXct(unite_analysis$created_at, format = "%a 
 hist(unite_analysis$created_at, breaks ="min", freq = TRUE, 
      ylab = "Minutes", xlab = "Unite The Right Tweets")
 
+#unite_fit2 will use k=74 from above, but addes whether user is verified and time
+#as covariates 
+head(unite_meta$created_at)
+head(unite_meta$verified)
+#convert verified to false = 0, true = 1
+unite_meta$verified [unite_meta$verified == "TRUE"] <- 1
+unite_meta$verified [unite_meta$verified == "FALSE"] <- 0
+unite_meta$verified <- as.integer(unite_meta$verified)
+head(unite_meta$verified)
+table(unite_meta$verified)
+
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
+
 #cool, run new stm with time as prevalence factor 
 #prevalence = covariates affecting frequency with which topics are discussed 
 #here time. Prevalance also includes a topical content covariate, 
