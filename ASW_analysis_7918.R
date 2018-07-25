@@ -111,8 +111,9 @@ unite_meta$verified <- as.integer(unite_meta$verified)
 head(unite_meta$verified)
 table(unite_meta$verified)
 
-git config --global user.email "you@example.com"
-git config --global user.name "Your Name"
+#git
+#git config --global user.email "you@example.com"
+#git config --global user.name "Your Name"
 
 #cool, run new stm with time as prevalence factor 
 #prevalence = covariates affecting frequency with which topics are discussed 
@@ -129,7 +130,7 @@ unite_fit2 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=74
 #the returned model. 
 
 #unite
-unite_storage <- searchK(unite_out$documents, unite_out$vocab, K = c(10,20,30,40,50,60,70,80,90,100), data = meta) 
+unite_storage <- searchK(unite_out$documents, unite_out$vocab, K = c(10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100), data = unite_meta) 
 plot(unite_storage)
 
 #lowest held out likelihood = 100 topics
@@ -137,7 +138,7 @@ plot(unite_storage)
 #highest semantic coherence = 60 topics
 #highest lower bound = 100 topics
 
-#algorithm chose 80 topics, 80 seems reasonable 
+#algorithm chose 74 topics, 74 seems reasonable 
 
 #Understand 
 #STM lets us do a couple of things: 
