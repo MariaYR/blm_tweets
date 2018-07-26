@@ -121,8 +121,8 @@ table(unite_meta$verified)
 #here whether the account is verified
 #unite_fit2 will use k=74 from above, but addes whether user is verified and time
 #as covariates 
-unite_fit2 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=74, 
-                  prevalence =~ unite_meta$created_at + unite_meta$verified,  
+unite_fit2 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=20, 
+                  prevalence =~unite_meta$verified + unite_meta$created_at,max.em.its = 75, 
                   data = unite_out$meta, init.type = "Spectral")
 
 #Evaluate
