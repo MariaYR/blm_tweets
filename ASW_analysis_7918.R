@@ -123,7 +123,7 @@ table(unite_meta$verified)
 #as covariates 
 unite_fit2 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=20, 
                   prevalence =~unite_meta$verified + unite_meta$created_at,max.em.its = 75, 
-                  data = unite_out$meta, init.type = "Spectral")
+                  gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
 
 #Evaluate
 #searchk runs selectmodel for researcher selected # of k and computes diagnostic properties for
