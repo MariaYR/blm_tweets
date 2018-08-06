@@ -174,14 +174,12 @@ plot(prep2,covariate ="verified", topics = c(54,43,55),
 #summary(prep)
 
 #when stuck at "completed E step" change gamma.prior to "L1", and get unstuck. 
-unite_fit3 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=74, 
-                  prevalence =~unite_meta$verified + unite_meta$created_at, 
-                  gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
-
 #run 3rd model with k=0 per k=0 fit1
+
 unite_fit3 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=0, 
                   prevalence =~unite_meta$verified + unite_meta$created_at, 
                   gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
+
 
 #Evaluate
 #searchk runs selectmodel for researcher selected # of k and computes diagnostic properties for
