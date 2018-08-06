@@ -121,21 +121,67 @@ table(unite_meta$verified)
 #here whether the account is verified
 #unite_fit2 will use k=74 from above, but addes whether user is verified and time
 #as covariates 
-unite_fit2 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=20, 
+unite_fit2 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=74, 
                   prevalence =~unite_meta$verified + unite_meta$created_at, max.em.its = 75, 
                   gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
 
 labelTopics (unite_fit2)
 unite_meta$verified <- as.factor(unite_meta$verified)
-prep <- estimateEffect(1:20 ~ verified + created_at, unite_fit2, meta = unite_meta, uncertainty = "Global")
-summary(prep, topics=1)
+#use largest proportional topic
+#first, find it 
+plot.STM(unite_fit2,type="summary", xlim=c(0, .3))
+#just top 20 
+plot.STM(unite_fit2,type="summary", xlim=c(0, .3), ylim=c(54,74))
+
+#effect of verified users
+#number of simulations default = 25 
+prep <- estimateEffect(c(54) ~ verified, unite_fit2, meta = unite_meta, uncertainty = "Global")
+summary(prep)
+plot(prep, "verified", model=unite_fit2, method="pointestimate")
+
+#effect of time of tweet 
+#prep2 <- estimateEffect(c(54) ~ created_at, unite_fit2, meta = unite_meta, uncertainty = "None")
+#Error in qr.default(xmat) : too large a matrix for LINPACK
+
+prep2 <- estimateEffect(1:74 ~ verified, unite_fit2, meta = unite_meta, uncertainty = "Global")
+summary(prep2, topics=54)
+summary(prep2, topics=43)
+summary(prep2, topics=55)
+#the marginal topic proportion for each of the levels
+
+plot(prep, "verified", model=unite_fit2, method="pointestimate")
+
+plot(prep2,covariate ="verified", topics = c(54,43,55), 
+     model=unite_fit2, method="pointestimate", 
+     xlab = "Verified Twitter User....Not Verified", 
+     main = "Effect of Verified Twitter Users", 
+     xlim = c(-.1, .1))
+
+
+#from Github page - how to use estimate effect
+#Just one topic (note we need c() to indicate it is a vector)
+#prep <- estimateEffect(c(1) ~ treatment, gadarianFit, gadarian)
+#summary(prep)
+#plot(prep, "treatment", model=gadarianFit, method="pointestimate")
+
+#three topics at once
+#prep <- estimateEffect(1:3 ~ treatment, gadarianFit, gadarian)
+#summary(prep)
+#plot(prep, "treatment", model=gadarianFit, method="pointestimate")
+
+##with interactions
+#prep <- estimateEffect(1 ~ treatment*s(pid_rep), gadarianFit, gadarian)
+#summary(prep)
 
 #when stuck at "completed E step" change gamma.prior to "L1", and get unstuck. 
 unite_fit3 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=74, 
                   prevalence =~unite_meta$verified + unite_meta$created_at, 
                   gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
 
-#run 3rd model with k=74 per k=0 fit1
+#run 3rd model with k=0 per k=0 fit1
+unite_fit3 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=0, 
+                  prevalence =~unite_meta$verified + unite_meta$created_at, 
+                  gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
 
 #Evaluate
 #searchk runs selectmodel for researcher selected # of k and computes diagnostic properties for
