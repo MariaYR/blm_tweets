@@ -122,8 +122,20 @@ table(unite_meta$verified)
 #unite_fit2 will use k=74 from above, but addes whether user is verified and time
 #as covariates 
 unite_fit2 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=20, 
-                  prevalence =~unite_meta$verified + unite_meta$created_at,max.em.its = 75, 
+                  prevalence =~unite_meta$verified + unite_meta$created_at, max.em.its = 75, 
                   gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
+
+labelTopics (unite_fit2)
+unite_meta$verified <- as.factor(unite_meta$verified)
+prep <- estimateEffect(1:20 ~ verified + created_at, unite_fit2, meta = unite_meta, uncertainty = "Global")
+summary(prep, topics=1)
+
+#when stuck at "completed E step" change gamma.prior to "L1", and get unstuck. 
+unite_fit3 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=74, 
+                  prevalence =~unite_meta$verified + unite_meta$created_at, 
+                  gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
+
+#run 3rd model with k=74 per k=0 fit1
 
 #Evaluate
 #searchk runs selectmodel for researcher selected # of k and computes diagnostic properties for
