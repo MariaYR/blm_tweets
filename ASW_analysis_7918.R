@@ -95,10 +95,12 @@ head(unite_analysis$created_at)
 #     ylab = "Minutes", xlab = "Unite The Right Tweets")
 #now execute the conversion with the required dataframe
 unite_analysis$created_at <- as.POSIXct(unite_analysis$created_at, format = "%a %b %d %H:%M:%S +0000 %Y")
+unite_meta$created_at <- as.POSIXct(unite_meta$created_at, format = "%a %b %d %H:%M:%S +0000 %Y")
 
 #just a check 
-hist(unite_analysis$created_at, breaks ="min", freq = TRUE, 
-     ylab = "Minutes", xlab = "Unite The Right Tweets")
+hist(unite_meta$created_at, breaks ="min", freq = TRUE, 
+     ylab = "Number of Tweets", xlab = "Time", 
+     main = "Frequency of #UniteTheRight Tweets")
 
 #unite_fit2 will use k=74 from above, but addes whether user is verified and time
 #as covariates 
@@ -180,7 +182,29 @@ unite_fit3 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=0,
                   prevalence =~unite_meta$verified + unite_meta$created_at, 
                   gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
 
+labelTopics (unite_fit3)
 
+# i need to isolate teh time of tweets from unite_meta
+#then conver to a continuous variable 
+#use seperate function from tidyr 
+
+#effect of time of tweet 
+#prep2 <- estimateEffect(c(54) ~ created_at, unite_fit2, meta = unite_meta, uncertainty = "None")
+#Error in qr.default(xmat) : too large a matrix for LINPACK
+
+prep3 <- estimateEffect(1:75 ~ verified + created_at, unite_fit3, meta = unite_meta, uncertainty = "Global")
+summary(prep2, topics=54)
+summary(prep2, topics=43)
+summary(prep2, topics=55)
+#the marginal topic proportion for each of the levels
+
+plot(prep, "verified", model=unite_fit2, method="pointestimate")
+
+plot(prep2,covariate ="verified", topics = c(54,43,55), 
+     model=unite_fit2, method="pointestimate", 
+     xlab = "Verified Twitter User....Not Verified", 
+     main = "Effect of Verified Twitter Users", 
+     xlim = c(-.1, .1))
 #Evaluate
 #searchk runs selectmodel for researcher selected # of k and computes diagnostic properties for
 #the returned model. 
