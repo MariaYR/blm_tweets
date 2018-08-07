@@ -162,7 +162,6 @@ plot(prep2,covariate ="verified", topics = c(54,43,55),
      main = "Effect of Verified Twitter Users", 
      xlim = c(-.1, .1))
 
-
 #from Github page - how to use estimate effect
 #Just one topic (note we need c() to indicate it is a vector)
 #prep <- estimateEffect(c(1) ~ treatment, gadarianFit, gadarian)
@@ -199,9 +198,9 @@ unite_meta <-separate(unite_meta, created_at, c("date","time"), sep = " ")
 unite_meta$time <- as.POSIXct(unite_meta$time, format = "%H:%M:%S")
 
 #here's the example 
-str(Sys.time())
+#str(Sys.time())
 # POSIXct[1:1], format: "2018-08-07 15:14:21"
-unclass(Sys.time())
+#unclass(Sys.time())
 # [1] 1533654871]
 
 #so...
@@ -215,6 +214,7 @@ unite_fit3 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=0,
                   prevalence =~unite_meta$verified + unite_meta$time, 
                   gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
 
+save.image("~/blm_tweets/asw_analysis_8718.RData")
 #if it doesn't make snese, use s(unite_meta$time) to 
 labelTopics (unite_fit3)
 
@@ -227,25 +227,69 @@ summary(prep3)
 
 #largest proportional topics??
 plot.STM(unite_fit3,type="summary", xlim=c(0, .3))
-#just top 20 
-#plot.STM(unite_fit3,type="summary", xlim=c(0, .3), ylim=c(54,74))
+#break up visual 
+plot.STM(unite_fit3,type="summary", xlim=c(0, .3), ylim=c(40,60))
+plot.STM(unite_fit3,type="summary", xlim=c(0, .3), ylim=c(20,40))
+plot.STM(unite_fit3,type="summary", xlim=c(0, .3), ylim=c(1,20))
 
 #effect of verified users
 #number of simulations default = 25 
-prep3_XX <- estimateEffect(c(XX) ~ verified, unite_fit3, meta = unite_meta, uncertainty = "Global")
+plot(prep3, "verified", model=unite_fit3, method="pointestimate")
 
-summary(prep2, topics=54)
-summary(prep2, topics=43)
-summary(prep2, topics=55)
+plot(prep3, covariate = "verified", topics = c(40, 44, 31),
+     model = unite_fit3, method = "difference",
+     cov.value1 = "Not Verified", cov.value2 = "Verified",
+     xlab = "Not Verified ... Verified",
+     main = "Effect of Verified Users",
+     xlim = c(-.1, .1), labeltype = "custom",
+     custom.labels = c('Topic 40','Topic 44', 'Topic 31'))
+     
+summary(prep3, topics=40)
+#Call:
+#  estimateEffect(formula = 1:60 ~ verified + time, stmobj = unite_fit3, 
+#                 metadata = unite_meta, uncertainty = "Global")
+
+
+#Topic 40:
+  
+#  Coefficients:
+#  Estimate Std. Error t value Pr(>|t|)
+#(Intercept) -1.579e+01  1.871e+01  -0.844    0.399
+#verified    -1.127e-03  4.243e-03  -0.266    0.791
+#time         1.030e-08  1.220e-08   0.845    0.398
+
+summary(prep3, topics=44)
+#Call:
+#  estimateEffect(formula = 1:60 ~ verified + time, stmobj = unite_fit3, 
+#                 metadata = unite_meta, uncertainty = "Global")
+
+
+#Topic 44:
+  
+#  Coefficients:
+#  Estimate Std. Error t value Pr(>|t|)
+#(Intercept) -1.582e+01  1.858e+01  -0.851    0.395
+#verified    -1.135e-03  4.272e-03  -0.266    0.790
+#time         1.032e-08  1.212e-08   0.852    0.394
+
+summary(prep3, topics=31)
+#Call:
+#  estimateEffect(formula = 1:60 ~ verified + time, stmobj = unite_fit3, 
+#                 metadata = unite_meta, uncertainty = "Global")
+
+
+#Topic 31:
+  
+#  Coefficients:
+#  Estimate Std. Error t value Pr(>|t|)
+#(Intercept) -1.582e+01  1.867e+01  -0.847    0.397
+#verified    -1.136e-03  4.244e-03  -0.268    0.789
+#time         1.032e-08  1.218e-08   0.848    0.397
+#verified user and time not significant 
+
 #the marginal topic proportion for each of the levels
 
-plot(prep, "verified", model=unite_fit2, method="pointestimate")
 
-plot(prep2,covariate ="verified", topics = c(54,43,55), 
-     model=unite_fit2, method="pointestimate", 
-     xlab = "Verified Twitter User....Not Verified", 
-     main = "Effect of Verified Twitter Users", 
-     xlim = c(-.1, .1))
 #Evaluate
 #searchk runs selectmodel for researcher selected # of k and computes diagnostic properties for
 #the returned model. 
