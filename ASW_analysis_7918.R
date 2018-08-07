@@ -8,6 +8,9 @@ load("~/Dropbox/BLMTweets/paper_analysis/blm_tweets_repo/stm_analysis_7.11.18.RD
 library(streamR)
 library (tidyverse)
 library(stm)
+library (Rtsne)
+library(rsvd)
+library(geometry)
 ##############
 #STM 
 ##############
@@ -69,10 +72,6 @@ names(unite_meta)
 #picked up on line 142
 
 #Estimate 
-library (Rtsne)
-library(rsvd)
-library(geometry)
-
 unite_fit <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=0, 
                  data = unite_out$meta, init.type = "Spectral")
 
@@ -96,6 +95,10 @@ head(unite_analysis$created_at)
 #now execute the conversion with the required dataframe
 unite_analysis$created_at <- as.POSIXct(unite_analysis$created_at, format = "%a %b %d %H:%M:%S +0000 %Y")
 unite_meta$created_at <- as.POSIXct(unite_meta$created_at, format = "%a %b %d %H:%M:%S +0000 %Y")
+
+#unite_out$meta$created_at - as.POSIXct(unite_out$meta$created_at, format = "%a %b %d %H:%M:%S +0000 %Y")
+#Error in `-.POSIXt`(unite_out$meta$created_at, as.POSIXct(unite_out$meta$created_at,  : 
+#                                                            can only subtract from "POSIXt" objects
 
 #just a check 
 hist(unite_meta$created_at, breaks ="min", freq = TRUE, 
@@ -184,15 +187,53 @@ unite_fit3 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=0,
 
 labelTopics (unite_fit3)
 
-# i need to isolate teh time of tweets from unite_meta
-#then conver to a continuous variable 
+# i need to isolate the time of tweets from unite_meta
+#then convert to a continuous variable 
 #use seperate function from tidyr 
+library(tidyverse)
+test<- separate(unite_meta, created_at, c("date","time"), sep = " ")
+unite_meta <-separate(unite_meta, created_at, c("date","time"), sep = " ")
+#now have unite_meta$date and unite_meta$time 
+
+#convert time to continuous variable 
+unite_meta$time <- as.POSIXct(unite_meta$time, format = "%H:%M:%S")
+
+#here's the example 
+str(Sys.time())
+# POSIXct[1:1], format: "2018-08-07 15:14:21"
+unclass(Sys.time())
+# [1] 1533654871]
+
+#so...
+unclass(unite_meta$time)
+#converts to seconds since the beginning of January 1, 1970, also known as seconds since epoch
+
+#now run unite_fit3 again 
+#run 3rd model with k=0 per k=0 fit1
+
+unite_fit3 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=0, 
+                  prevalence =~unite_meta$verified + unite_meta$time, 
+                  gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
+
+#if it doesn't make snese, use s(unite_meta$time) to 
+labelTopics (unite_fit3)
 
 #effect of time of tweet 
 #prep2 <- estimateEffect(c(54) ~ created_at, unite_fit2, meta = unite_meta, uncertainty = "None")
 #Error in qr.default(xmat) : too large a matrix for LINPACK
 
-prep3 <- estimateEffect(1:75 ~ verified + created_at, unite_fit3, meta = unite_meta, uncertainty = "Global")
+prep3 <- estimateEffect(1:60 ~ verified + time, unite_fit3, meta = unite_meta, uncertainty = "Global")
+summary(prep3)
+
+#largest proportional topics??
+plot.STM(unite_fit3,type="summary", xlim=c(0, .3))
+#just top 20 
+#plot.STM(unite_fit3,type="summary", xlim=c(0, .3), ylim=c(54,74))
+
+#effect of verified users
+#number of simulations default = 25 
+prep3_XX <- estimateEffect(c(XX) ~ verified, unite_fit3, meta = unite_meta, uncertainty = "Global")
+
 summary(prep2, topics=54)
 summary(prep2, topics=43)
 summary(prep2, topics=55)
