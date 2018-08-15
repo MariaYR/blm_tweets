@@ -3,8 +3,8 @@
 ## remove any previously saved objects in your R environment
 rm(list=ls())
 
-setwd ("~/Dropbox/BLMTweets/paper_analysis/blm_tweets_repo")
-load("~/Dropbox/BLMTweets/paper_analysis/blm_tweets_repo/stm_analysis_7.11.18.RData")
+setwd ("~/Dropbox/blm_tweets/")
+load("~/Dropbox/blm_tweets/stm_analysis_7.11.18.RData")
 library(streamR)
 library (tidyverse)
 library(stm)
@@ -71,7 +71,6 @@ head(unite_meta)
 names(unite_meta)
 #picked up on line 142
 
-<<<<<<< HEAD
 #Estimate
 install.packages("Rtsne")
 install.packages("rsvd")
@@ -80,9 +79,7 @@ library (Rtsne)
 library(rsvd)
 library(geometry)
 
-=======
 #Estimate 
->>>>>>> 0938be92b82807062f5b4859d3b328132a6021e6
 unite_fit <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=0, 
                  data = unite_out$meta, init.type = "Spectral")
 
@@ -137,7 +134,6 @@ table(unite_meta$verified)
 #here whether the account is verified
 #unite_fit2 will use k=74 from above, but addes whether user is verified and time
 #as covariates 
-<<<<<<< HEAD
 
 head(unite_meta$created_at)
 head(unite_meta$verified)
@@ -151,7 +147,7 @@ table(unite_meta$verified)
 unite_fit2 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=5, 
                   prevalence =~ unite_meta$created_at + unite_meta$verified, max.em.its = 10,  
                   data = unite_out$meta, init.type = "Spectral")
-=======
+
 unite_fit2 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=74, 
                   prevalence =~unite_meta$verified + unite_meta$created_at, max.em.its = 75, 
                   gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
