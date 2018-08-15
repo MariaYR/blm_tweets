@@ -8,6 +8,9 @@ load("~/Dropbox/BLMTweets/paper_analysis/blm_tweets_repo/stm_analysis_7.11.18.RD
 library(streamR)
 library (tidyverse)
 library(stm)
+library (Rtsne)
+library(rsvd)
+library(geometry)
 ##############
 #STM 
 ##############
@@ -68,6 +71,7 @@ head(unite_meta)
 names(unite_meta)
 #picked up on line 142
 
+<<<<<<< HEAD
 #Estimate
 install.packages("Rtsne")
 install.packages("rsvd")
@@ -76,6 +80,9 @@ library (Rtsne)
 library(rsvd)
 library(geometry)
 
+=======
+#Estimate 
+>>>>>>> 0938be92b82807062f5b4859d3b328132a6021e6
 unite_fit <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=0, 
                  data = unite_out$meta, init.type = "Spectral")
 
@@ -98,10 +105,31 @@ head(unite_analysis$created_at)
 #     ylab = "Minutes", xlab = "Unite The Right Tweets")
 #now execute the conversion with the required dataframe
 unite_analysis$created_at <- as.POSIXct(unite_analysis$created_at, format = "%a %b %d %H:%M:%S +0000 %Y")
+unite_meta$created_at <- as.POSIXct(unite_meta$created_at, format = "%a %b %d %H:%M:%S +0000 %Y")
+
+#unite_out$meta$created_at - as.POSIXct(unite_out$meta$created_at, format = "%a %b %d %H:%M:%S +0000 %Y")
+#Error in `-.POSIXt`(unite_out$meta$created_at, as.POSIXct(unite_out$meta$created_at,  : 
+#                                                            can only subtract from "POSIXt" objects
 
 #just a check 
-hist(unite_analysis$created_at, breaks ="min", freq = TRUE, 
-     ylab = "Minutes", xlab = "Unite The Right Tweets")
+hist(unite_meta$created_at, breaks ="min", freq = TRUE, 
+     ylab = "Number of Tweets", xlab = "Time", 
+     main = "Frequency of #UniteTheRight Tweets")
+
+#unite_fit2 will use k=74 from above, but addes whether user is verified and time
+#as covariates 
+head(unite_meta$created_at)
+head(unite_meta$verified)
+#convert verified to false = 0, true = 1
+unite_meta$verified [unite_meta$verified == "TRUE"] <- 1
+unite_meta$verified [unite_meta$verified == "FALSE"] <- 0
+unite_meta$verified <- as.integer(unite_meta$verified)
+head(unite_meta$verified)
+table(unite_meta$verified)
+
+#git
+#git config --global user.email "you@example.com"
+#git config --global user.name "Your Name"
 
 #cool, run new stm with time as prevalence factor 
 #prevalence = covariates affecting frequency with which topics are discussed 
@@ -109,6 +137,7 @@ hist(unite_analysis$created_at, breaks ="min", freq = TRUE,
 #here whether the account is verified
 #unite_fit2 will use k=74 from above, but addes whether user is verified and time
 #as covariates 
+<<<<<<< HEAD
 
 head(unite_meta$created_at)
 head(unite_meta$verified)
@@ -122,13 +151,178 @@ table(unite_meta$verified)
 unite_fit2 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=5, 
                   prevalence =~ unite_meta$created_at + unite_meta$verified, max.em.its = 10,  
                   data = unite_out$meta, init.type = "Spectral")
+=======
+unite_fit2 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=74, 
+                  prevalence =~unite_meta$verified + unite_meta$created_at, max.em.its = 75, 
+                  gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
+
+labelTopics (unite_fit2)
+unite_meta$verified <- as.factor(unite_meta$verified)
+#use largest proportional topic
+#first, find it 
+plot.STM(unite_fit2,type="summary", xlim=c(0, .3))
+#just top 20 
+plot.STM(unite_fit2,type="summary", xlim=c(0, .3), ylim=c(54,74))
+
+#effect of verified users
+#number of simulations default = 25 
+prep <- estimateEffect(c(54) ~ verified, unite_fit2, meta = unite_meta, uncertainty = "Global")
+summary(prep)
+plot(prep, "verified", model=unite_fit2, method="pointestimate")
+
+#effect of time of tweet 
+#prep2 <- estimateEffect(c(54) ~ created_at, unite_fit2, meta = unite_meta, uncertainty = "None")
+#Error in qr.default(xmat) : too large a matrix for LINPACK
+
+prep2 <- estimateEffect(1:74 ~ verified, unite_fit2, meta = unite_meta, uncertainty = "Global")
+summary(prep2, topics=54)
+summary(prep2, topics=43)
+summary(prep2, topics=55)
+#the marginal topic proportion for each of the levels
+
+plot(prep, "verified", model=unite_fit2, method="pointestimate")
+
+plot(prep2,covariate ="verified", topics = c(54,43,55), 
+     model=unite_fit2, method="pointestimate", 
+     xlab = "Verified Twitter User....Not Verified", 
+     main = "Effect of Verified Twitter Users", 
+     xlim = c(-.1, .1))
+
+#from Github page - how to use estimate effect
+#Just one topic (note we need c() to indicate it is a vector)
+#prep <- estimateEffect(c(1) ~ treatment, gadarianFit, gadarian)
+#summary(prep)
+#plot(prep, "treatment", model=gadarianFit, method="pointestimate")
+
+#three topics at once
+#prep <- estimateEffect(1:3 ~ treatment, gadarianFit, gadarian)
+#summary(prep)
+#plot(prep, "treatment", model=gadarianFit, method="pointestimate")
+
+##with interactions
+#prep <- estimateEffect(1 ~ treatment*s(pid_rep), gadarianFit, gadarian)
+#summary(prep)
+
+#when stuck at "completed E step" change gamma.prior to "L1", and get unstuck. 
+#run 3rd model with k=0 per k=0 fit1
+
+unite_fit3 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=0, 
+                  prevalence =~unite_meta$verified + unite_meta$created_at, 
+                  gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
+
+labelTopics (unite_fit3)
+
+# i need to isolate the time of tweets from unite_meta
+#then convert to a continuous variable 
+#use seperate function from tidyr 
+library(tidyverse)
+test<- separate(unite_meta, created_at, c("date","time"), sep = " ")
+unite_meta <-separate(unite_meta, created_at, c("date","time"), sep = " ")
+#now have unite_meta$date and unite_meta$time 
+
+#convert time to continuous variable 
+unite_meta$time <- as.POSIXct(unite_meta$time, format = "%H:%M:%S")
+
+#here's the example 
+#str(Sys.time())
+# POSIXct[1:1], format: "2018-08-07 15:14:21"
+#unclass(Sys.time())
+# [1] 1533654871]
+
+#so...
+unclass(unite_meta$time)
+#converts to seconds since the beginning of January 1, 1970, also known as seconds since epoch
+
+#now run unite_fit3 again 
+#run 3rd model with k=0 per k=0 fit1
+
+unite_fit3 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=0, 
+                  prevalence =~unite_meta$verified + unite_meta$time, 
+                  gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
+
+save.image("~/blm_tweets/asw_analysis_8718.RData")
+#if it doesn't make snese, use s(unite_meta$time) to 
+labelTopics (unite_fit3)
+
+#effect of time of tweet 
+#prep2 <- estimateEffect(c(54) ~ created_at, unite_fit2, meta = unite_meta, uncertainty = "None")
+#Error in qr.default(xmat) : too large a matrix for LINPACK
+
+prep3 <- estimateEffect(1:60 ~ verified + time, unite_fit3, meta = unite_meta, uncertainty = "Global")
+summary(prep3)
+
+#largest proportional topics??
+plot.STM(unite_fit3,type="summary", xlim=c(0, .3))
+#break up visual 
+plot.STM(unite_fit3,type="summary", xlim=c(0, .3), ylim=c(40,60))
+plot.STM(unite_fit3,type="summary", xlim=c(0, .3), ylim=c(20,40))
+plot.STM(unite_fit3,type="summary", xlim=c(0, .3), ylim=c(1,20))
+
+#effect of verified users
+#number of simulations default = 25 
+plot(prep3, "verified", model=unite_fit3, method="pointestimate")
+
+plot(prep3, covariate = "verified", topics = c(40, 44, 31),
+     model = unite_fit3, method = "difference",
+     cov.value1 = "Not Verified", cov.value2 = "Verified",
+     xlab = "Not Verified ... Verified",
+     main = "Effect of Verified Users",
+     xlim = c(-.1, .1), labeltype = "custom",
+     custom.labels = c('Topic 40','Topic 44', 'Topic 31'))
+     
+summary(prep3, topics=40)
+#Call:
+#  estimateEffect(formula = 1:60 ~ verified + time, stmobj = unite_fit3, 
+#                 metadata = unite_meta, uncertainty = "Global")
+
+
+#Topic 40:
+  
+#  Coefficients:
+#  Estimate Std. Error t value Pr(>|t|)
+#(Intercept) -1.579e+01  1.871e+01  -0.844    0.399
+#verified    -1.127e-03  4.243e-03  -0.266    0.791
+#time         1.030e-08  1.220e-08   0.845    0.398
+
+summary(prep3, topics=44)
+#Call:
+#  estimateEffect(formula = 1:60 ~ verified + time, stmobj = unite_fit3, 
+#                 metadata = unite_meta, uncertainty = "Global")
+
+
+#Topic 44:
+  
+#  Coefficients:
+#  Estimate Std. Error t value Pr(>|t|)
+#(Intercept) -1.582e+01  1.858e+01  -0.851    0.395
+#verified    -1.135e-03  4.272e-03  -0.266    0.790
+#time         1.032e-08  1.212e-08   0.852    0.394
+
+summary(prep3, topics=31)
+#Call:
+#  estimateEffect(formula = 1:60 ~ verified + time, stmobj = unite_fit3, 
+#                 metadata = unite_meta, uncertainty = "Global")
+
+
+#Topic 31:
+  
+#  Coefficients:
+#  Estimate Std. Error t value Pr(>|t|)
+#(Intercept) -1.582e+01  1.867e+01  -0.847    0.397
+#verified    -1.136e-03  4.244e-03  -0.268    0.789
+#time         1.032e-08  1.218e-08   0.848    0.397
+#verified user and time not significant 
+
+#the marginal topic proportion for each of the levels
+
+>>>>>>> 0938be92b82807062f5b4859d3b328132a6021e6
 
 #Evaluate
 #searchk runs selectmodel for researcher selected # of k and computes diagnostic properties for
 #the returned model. 
 
 #unite
-unite_storage <- searchK(unite_out$documents, unite_out$vocab, K = c(10,20,30,40,50,60,70,80,90,100), data = meta) 
+unite_storage <- searchK(unite_out$documents, unite_out$vocab, K = c(10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100), data = unite_meta) 
 plot(unite_storage)
 
 #lowest held out likelihood = 100 topics
@@ -136,7 +330,7 @@ plot(unite_storage)
 #highest semantic coherence = 60 topics
 #highest lower bound = 100 topics
 
-#algorithm chose 80 topics, 80 seems reasonable 
+#algorithm chose 74 topics, 74 seems reasonable 
 
 #Understand 
 #STM lets us do a couple of things: 
