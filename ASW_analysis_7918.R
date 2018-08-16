@@ -199,7 +199,9 @@ summary(prep_top)
   ---
 #Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
-
+#interpretation - verified users use this topic more than non-verified users
+#time tweeted is not a strong predictor of this topic ??
+  
 #Topic 55:
   
 #Coefficients:
@@ -209,7 +211,9 @@ summary(prep_top)
 #created_at  -3.452e-07  2.357e-08 -14.644  < 2e-16 ***
   ---
 #Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
+#interpretation - unverified users use this topic more than verified users
+#time tweeted is not a strong predictor of this topic 
+  
 
 #Topic 43:
   
@@ -220,7 +224,9 @@ summary(prep_top)
 #created_at  -3.075e-07  2.789e-08 -11.023  < 2e-16 ***
   ---
 #Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
+#interpretation - nonverified users use this topic more than verified users
+#time tweeted is not strong predictor of this topic OR is it about how early/late
+  
 
 #Topic 35:
   
@@ -231,7 +237,8 @@ summary(prep_top)
 #created_at  -2.708e-07  2.357e-08 -11.486  < 2e-16 ***
   ---
 #Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
+#interpretation - verified users use this topic more than non-verified users
+  
 
 #Topic 20:
   
@@ -242,7 +249,8 @@ summary(prep_top)
 #created_at  -6.183e-07  2.280e-08 -27.124  < 2e-16 ***
   ---
 #Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
+#interpretation - nonverified users use this topic more than verified users
+  
 #Topic 73:
   
 #Coefficients:
@@ -252,7 +260,8 @@ summary(prep_top)
 #created_at  -9.275e-08  2.376e-08  -3.904 9.48e-05 ***
   ---
 #Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
+#interpretation - nonverified users use this topic more than verified users
+  
 
 #Topic 53:
   
@@ -263,7 +272,10 @@ summary(prep_top)
 #created_at   6.981e-07  2.107e-08  33.130   <2e-16 ***
   ---
 #Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
+#interpretation - verified users use this topic more than non-verified users
+#but not statistically significant 
+#time tweeted is strong predictor of this topic 
+  
 
 #Topic 59:
   
@@ -274,7 +286,8 @@ summary(prep_top)
 #created_at  -1.011e-07  1.761e-08  -5.739 9.56e-09 ***
   ---
 #Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
+#interpretation - verified users use this topic more than non-verified users
+  
 
 #Topic 61:
   
@@ -285,7 +298,11 @@ summary(prep_top)
 #created_at   1.543e-07  1.949e-08   7.917 2.46e-15 ***
   ---
 #Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
+#interpretation - verified users use this topic more than non-verified users
+#but not statistically signifcant 
+#time tweet created stronger predictor 
+  
+  
 
 #Topic 56:
   
@@ -296,14 +313,18 @@ summary(prep_top)
 #created_at   3.758e-08  2.050e-08   1.834   0.0667 .
 ---
 #Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#interpretation - verified users use this topic more than non-verified users
+  
 ####################
 
-plot(prep_top, "Estimated effect of verified users & time of tweet", model=unite_fit2, method="pointestimate")
+plot(prep_top, "Estimated effect of verified users & time of tweet", 
+     model=unite_fit2, method="pointestimate",
+     cov.value1 = 1, cov.value2 = )
 
-plot(prep2,covariate ="verified", topics = c(54,43,55), 
-     model=unite_fit2, method="pointestimate", 
+plot.estimateEffect(prep_top, model=unite_fit2, method="pointestimate", 
      xlab = "Verified Twitter User....Not Verified", 
      main = "Effect of Verified Twitter Users", 
+     pintlegend = T, verbose.labels = F,
      xlim = c(-.1, .1))
 
 #from Github page - how to use estimate effect
