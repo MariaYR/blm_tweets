@@ -174,9 +174,131 @@ prep2 <- estimateEffect(1:74 ~ verified, unite_fit2, meta = unite_meta, uncertai
 summary(prep2, topics=54)
 summary(prep2, topics=43)
 summary(prep2, topics=55)
-#the marginal topic proportion for each of the levels
+#just plot top 10 topics
+#54, 55, 43, 35, 20, 73, 53, 59, 61, 56
+prep_top <- estimateEffect(c(54, 55, 43, 35, 20, 73, 53, 59, 61, 56) ~ verified + created_at, unite_fit2, meta = unite_meta, uncertainty = "Global")
+summary(prep_top)
 
-plot(prep, "verified", model=unite_fit2, method="pointestimate")
+####################
+#> summary(prep_top)
+
+
+#Call:
+#  estimateEffect(formula = c(54, 55, 43, 35, 20, 73, 53, 59, 61, 
+#                             56) ~ verified + created_at, stmobj = unite_fit2, metadata = unite_meta, 
+#                 uncertainty = "Global")
+
+
+#Topic 54:
+  
+#Coefficients:
+#             Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  7.093e+02  3.729e+01  19.020  < 2e-16 ***
+#verified    -2.722e-02  6.690e-03  -4.069 4.72e-05 ***
+#created_at  -4.720e-07  2.482e-08 -19.019  < 2e-16 ***
+  ---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+#Topic 55:
+  
+#Coefficients:
+#              Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  5.187e+02  3.542e+01  14.645  < 2e-16 ***
+#verified    -2.741e-02  6.434e-03  -4.261 2.04e-05 ***
+#created_at  -3.452e-07  2.357e-08 -14.644  < 2e-16 ***
+  ---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+#Topic 43:
+  
+#Coefficients:
+#              Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  4.621e+02  4.191e+01  11.024  < 2e-16 ***
+#verified    -1.864e-02  7.203e-03  -2.587  0.00967 ** 
+#created_at  -3.075e-07  2.789e-08 -11.023  < 2e-16 ***
+  ---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+#Topic 35:
+  
+#Coefficients:
+#            Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  4.069e+02  3.542e+01  11.487  < 2e-16 ***
+#verified     5.084e-02  9.373e-03   5.425 5.82e-08 ***
+#created_at  -2.708e-07  2.357e-08 -11.486  < 2e-16 ***
+  ---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+#Topic 20:
+  
+#Coefficients:
+#              Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  9.291e+02  3.425e+01  27.125  < 2e-16 ***
+#verified    -2.220e-02  6.488e-03  -3.421 0.000624 ***
+#created_at  -6.183e-07  2.280e-08 -27.124  < 2e-16 ***
+  ---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+#Topic 73:
+  
+#Coefficients:
+#              Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  1.394e+02  3.571e+01   3.904 9.45e-05 ***
+#verified    -1.997e-02  6.167e-03  -3.239   0.0012 ** 
+#created_at  -9.275e-08  2.376e-08  -3.904 9.48e-05 ***
+  ---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+#Topic 53:
+  
+#Coefficients:
+#              Estimate Std. Error t value Pr(>|t|)    
+#(Intercept) -1.049e+03  3.166e+01 -33.130   <2e-16 ***
+#verified     7.393e-03  7.573e-03   0.976    0.329    
+#created_at   6.981e-07  2.107e-08  33.130   <2e-16 ***
+  ---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+#Topic 59:
+  
+#Coefficients:
+#              Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  1.519e+02  2.647e+01   5.740 9.52e-09 ***
+#verified     1.898e-02  7.580e-03   2.504   0.0123 *  
+#created_at  -1.011e-07  1.761e-08  -5.739 9.56e-09 ***
+  ---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+#Topic 61:
+  
+#Coefficients:
+#            Estimate Std. Error t value Pr(>|t|)    
+#(Intercept) -2.318e+02  2.928e+01  -7.917 2.47e-15 ***
+#verified     1.434e-03  6.024e-03   0.238    0.812    
+#created_at   1.543e-07  1.949e-08   7.917 2.46e-15 ***
+  ---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+#Topic 56:
+  
+#Coefficients:
+#               Estimate Std. Error t value Pr(>|t|)  
+#(Intercept) -5.645e+01  3.080e+01  -1.833   0.0668 .
+#verified     1.479e-02  7.201e-03   2.054   0.0399 *
+#created_at   3.758e-08  2.050e-08   1.834   0.0667 .
+---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+####################
+
+plot(prep_top, "Estimated effect of verified users & time of tweet", model=unite_fit2, method="pointestimate")
 
 plot(prep2,covariate ="verified", topics = c(54,43,55), 
      model=unite_fit2, method="pointestimate", 
