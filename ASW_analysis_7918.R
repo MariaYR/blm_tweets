@@ -159,6 +159,10 @@ unite_meta$verified <- as.factor(unite_meta$verified)
 plot.STM(unite_fit2,type="summary", xlim=c(0, .3))
 #just top 20 
 plot.STM(unite_fit2,type="summary", xlim=c(0, .3), ylim=c(54,74))
+plot.STM(unite_fit2,type="summary", xlim=c(0, .3), ylim=c(44,53))
+plot.STM(unite_fit2,type="summary", xlim=c(0, .3), ylim=c(24,44))
+plot.STM(unite_fit2,type="summary", xlim=c(0, .3), ylim=c(1,23))
+
 
 #effect of verified users
 #number of simulations default = 25 
