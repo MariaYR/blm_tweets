@@ -52,9 +52,9 @@ unite_processed <- textProcessor(unite_analysis$stripped_text, metadata = unite_
 
 #prepare
 unite_out <- prepDocuments(unite_processed$documents, unite_processed$vocab, unite_processed$meta)
-#Removing 5901 of 12473 terms (5901 of 641344 tokens) due to frequency  
-#Removing 201 Documents with No Words 
-#Your corpus now has 77480 documents, 6572 terms and 635443 tokens.
+#Removing 5729 of 12102 terms (5729 of 578582 tokens) due to frequency  
+#Removing 202 Documents with No Words 
+#Your corpus now has 76016 documents, 6373 terms and 572853 tokens.
 
 plotRemoved(unite_processed$documents, lower.thresh = seq(1,10, by =5))
 
@@ -82,7 +82,6 @@ library(geometry)
 #Estimate 
 unite_fit <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=0, 
                  data = unite_out$meta, init.type = "Spectral")
-
 
 #k=0 results in 74 topics 
 
@@ -124,10 +123,6 @@ unite_meta$verified <- as.integer(unite_meta$verified)
 head(unite_meta$verified)
 table(unite_meta$verified)
 
-#git
-#git config --global user.email "you@example.com"
-#git config --global user.name "Your Name"
-
 #cool, run new stm with time as prevalence factor 
 #prevalence = covariates affecting frequency with which topics are discussed 
 #here time. Prevalance also includes a topical content covariate, 
@@ -137,12 +132,7 @@ table(unite_meta$verified)
 
 head(unite_meta$created_at)
 head(unite_meta$verified)
-#convert verified to false = 0, true = 1) 
-unite_meta$verified [unite_meta$verified == "TRUE"] <- 1
-unite_meta$verified [unite_meta$verified == "FALSE"] <- 0
-unite_meta$verified <- as.integer(unite_meta$verified)
-head(unite_meta$verified)
-table(unite_meta$verified)
+
 
 unite_fit2 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=5, 
                   prevalence =~ unite_meta$created_at + unite_meta$verified, max.em.its = 10,  
@@ -154,11 +144,14 @@ unite_fit2 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=74
 
 labelTopics (unite_fit2)
 unite_meta$verified <- as.factor(unite_meta$verified)
+
 #use largest proportional topic
 #first, find it 
 plot.STM(unite_fit2,type="summary", xlim=c(0, .3))
+
 #just top 20 
 plot.STM(unite_fit2,type="summary", xlim=c(0, .3), ylim=c(54,74))
+
 #rest
 plot.STM(unite_fit2,type="summary", xlim=c(0, .3), ylim=c(44,53))
 plot.STM(unite_fit2,type="summary", xlim=c(0, .3), ylim=c(24,44))
@@ -167,23 +160,31 @@ plot.STM(unite_fit2,type="summary", xlim=c(0, .3), ylim=c(1,23))
 
 #effect of verified users
 #number of simulations default = 25 
-prep <- estimateEffect(c(54) ~ verified, unite_fit2, meta = unite_meta, uncertainty = "Global")
+prep <- estimateEffect(c(54, 55, 43) ~ verified, unite_fit2, meta = unite_meta, uncertainty = "Global")
 summary(prep)
-plot(prep, "verified", model=unite_fit2, method="pointestimate")
+plot(prep, "verified", model=unite_fit2, method="pointestimate",
+     width = 5, main ="Estimated effect of verified users & time of tweet")
 
-#effect of time of tweet 
-#prep2 <- estimateEffect(c(54) ~ created_at, unite_fit2, meta = unite_meta, uncertainty = "None")
-#Error in qr.default(xmat) : too large a matrix for LINPACK
 
-prep2 <- estimateEffect(1:74 ~ verified, unite_fit2, meta = unite_meta, uncertainty = "Global")
-summary(prep2, topics=54)
-summary(prep2, topics=43)
-summary(prep2, topics=55)
+prep2 <- estimateEffect(c(35, 20, 73) ~ verified, unite_fit2, meta = unite_meta, uncertainty = "Global")
+summary(prep2)
+plot(prep2, "verified", model=unite_fit2, method="pointestimate",
+     width = 10, main ="Estimated effect of verified users & time of tweet")
+
+prep3 <- estimateEffect(c(54, 55, 43) ~ verified, unite_fit2, meta = unite_meta, uncertainty = "Global")
+summary(prep3)
+plot(prep3, "verified", model=unite_fit2, method="pointestimate",
+     width = 10, main ="Estimated effect of verified users & time of tweet")
+
+prep4 <- estimateEffect(c(53, 59, 61, 56) ~ verified, unite_fit2, meta = unite_meta, uncertainty = "Global")
+summary(prep4)
+plot(prep4, "verified", model=unite_fit2, method="pointestimate",
+     width = 10, main ="Estimated effect of verified users & time of tweet")
+
 #just plot top 10 topics
 #54, 55, 43, 35, 20, 73, 53, 59, 61, 56
 prep_top <- estimateEffect(c(54, 55, 43, 35, 20, 73, 53, 59, 61, 56) ~ verified + created_at, unite_fit2, meta = unite_meta, uncertainty = "Global")
 summary(prep_top)
-
 ####################
 #> summary(prep_top)
 
@@ -322,16 +323,6 @@ summary(prep_top)
   
 ####################
 
-plot(prep_top, "Estimated effect of verified users & time of tweet", 
-     model=unite_fit2, method="pointestimate",
-     cov.value1 = 1, cov.value2 = )
-
-plot.estimateEffect(prep_top, model=unite_fit2, method="pointestimate", 
-     xlab = "Verified Twitter User....Not Verified", 
-     main = "Effect of Verified Twitter Users", 
-     pintlegend = T, verbose.labels = F,
-     xlim = c(-.1, .1))
-
 #from Github page - how to use estimate effect
 #Just one topic (note we need c() to indicate it is a vector)
 #prep <- estimateEffect(c(1) ~ treatment, gadarianFit, gadarian)
@@ -348,24 +339,10 @@ plot.estimateEffect(prep_top, model=unite_fit2, method="pointestimate",
 #summary(prep)
 
 #when stuck at "completed E step" change gamma.prior to "L1", and get unstuck. 
-#run 3rd model with k=0 per k=0 fit1
 
-unite_fit3 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=0, 
-                  prevalence =~unite_meta$verified + unite_meta$created_at, 
-                  gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
-
-labelTopics (unite_fit3)
-
-# i need to isolate the time of tweets from unite_meta
-#then convert to a continuous variable 
-#use seperate function from tidyr 
-library(tidyverse)
-test<- separate(unite_meta, created_at, c("date","time"), sep = " ")
-unite_meta <-separate(unite_meta, created_at, c("date","time"), sep = " ")
-#now have unite_meta$date and unite_meta$time 
 
 #convert time to continuous variable 
-unite_meta$time <- as.POSIXct(unite_meta$time, format = "%H:%M:%S")
+#unite_meta$time <- as.POSIXct(unite_meta$time, format = "%H:%M:%S")
 
 #here's the example 
 #str(Sys.time())
@@ -374,124 +351,11 @@ unite_meta$time <- as.POSIXct(unite_meta$time, format = "%H:%M:%S")
 # [1] 1533654871]
 
 #so...
-unclass(unite_meta$time)
+#unclass(unite_meta$time)
 #converts to seconds since the beginning of January 1, 1970, also known as seconds since epoch
 
-#now run unite_fit3 again 
-#run 3rd model with k=0 per k=0 fit1
-
-unite_fit3 <- stm(documents = unite_out$documents, vocab = unite_out$vocab, K=0, 
-                  prevalence =~unite_meta$verified + unite_meta$time, 
-                  gamma.prior="L1", data = unite_out$meta, init.type = "Spectral")
-
-save.image("~/blm_tweets/asw_analysis_8718.RData")
-#if it doesn't make snese, use s(unite_meta$time) to 
-labelTopics (unite_fit3)
-
-#effect of time of tweet 
-#prep2 <- estimateEffect(c(54) ~ created_at, unite_fit2, meta = unite_meta, uncertainty = "None")
-#Error in qr.default(xmat) : too large a matrix for LINPACK
-
-prep3 <- estimateEffect(1:60 ~ verified + time, unite_fit3, meta = unite_meta, uncertainty = "Global")
-summary(prep3)
-
-#largest proportional topics??
-plot.STM(unite_fit3,type="summary", xlim=c(0, .3))
-#break up visual 
-plot.STM(unite_fit3,type="summary", xlim=c(0, .3), ylim=c(40,60))
-plot.STM(unite_fit3,type="summary", xlim=c(0, .3), ylim=c(20,40))
-plot.STM(unite_fit3,type="summary", xlim=c(0, .3), ylim=c(1,20))
-
-#effect of verified users
-#number of simulations default = 25 
-plot(prep3, "verified", model=unite_fit3, method="pointestimate")
-
-plot(prep3, covariate = "verified", topics = c(40, 44, 31),
-     model = unite_fit3, method = "difference",
-     cov.value1 = "Not Verified", cov.value2 = "Verified",
-     xlab = "Not Verified ... Verified",
-     main = "Effect of Verified Users",
-     xlim = c(-.1, .1), labeltype = "custom",
-     custom.labels = c('Topic 40','Topic 44', 'Topic 31'))
-     
-summary(prep3, topics=40)
-#Call:
-#  estimateEffect(formula = 1:60 ~ verified + time, stmobj = unite_fit3, 
-#                 metadata = unite_meta, uncertainty = "Global")
-
-
-#Topic 40:
-  
-#  Coefficients:
-#  Estimate Std. Error t value Pr(>|t|)
-#(Intercept) -1.579e+01  1.871e+01  -0.844    0.399
-#verified    -1.127e-03  4.243e-03  -0.266    0.791
-#time         1.030e-08  1.220e-08   0.845    0.398
-
-summary(prep3, topics=44)
-#Call:
-#  estimateEffect(formula = 1:60 ~ verified + time, stmobj = unite_fit3, 
-#                 metadata = unite_meta, uncertainty = "Global")
-
-
-#Topic 44:
-  
-#  Coefficients:
-#  Estimate Std. Error t value Pr(>|t|)
-#(Intercept) -1.582e+01  1.858e+01  -0.851    0.395
-#verified    -1.135e-03  4.272e-03  -0.266    0.790
-#time         1.032e-08  1.212e-08   0.852    0.394
-
-summary(prep3, topics=31)
-#Call:
-#  estimateEffect(formula = 1:60 ~ verified + time, stmobj = unite_fit3, 
-#                 metadata = unite_meta, uncertainty = "Global")
-
-
-#Topic 31:
-  
-#  Coefficients:
-#  Estimate Std. Error t value Pr(>|t|)
-#(Intercept) -1.582e+01  1.867e+01  -0.847    0.397
-#verified    -1.136e-03  4.244e-03  -0.268    0.789
-#time         1.032e-08  1.218e-08   0.848    0.397
-#verified user and time not significant 
-
-#the marginal topic proportion for each of the levels
-
->>>>>>> 0938be92b82807062f5b4859d3b328132a6021e6
-
-#Evaluate
-#searchk runs selectmodel for researcher selected # of k and computes diagnostic properties for
-#the returned model. 
-
-#unite
-unite_storage <- searchK(unite_out$documents, unite_out$vocab, K = c(10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100), data = unite_meta) 
-plot(unite_storage)
-
-#lowest held out likelihood = 100 topics
-#lowest residual = 80 topics
-#highest semantic coherence = 60 topics
-#highest lower bound = 100 topics
-
-#algorithm chose 74 topics, 74 seems reasonable 
-
-#Understand 
-#STM lets us do a couple of things: 
-#1: display words associated with topics 
-
-#labelTopics 
-labelTopics (unite_fit)
-
-#convert to dataframe and export to csv 
-unite_k90 <- make.dt(unite_fit)
-write.csv(unite_k90, "unite_k90.csv")
-
-#2. Estimate the relationship between metadata and topics/topical content 
-estimateEffect()
-
-#3. Calculate topic correlations 
-unite_corr <- topicCorr(unite_fit, method = "simple", cutoff = 0.01, verbose = TRUE)
+#Calculate topic correlations 
+unite_corr <- topicCorr(unite_fit2, method = "simple", cutoff = 0.01, verbose = TRUE)
 
 #must install igraph before graphing correlations 
 library(igraph)
@@ -501,42 +365,38 @@ par(mar=c(0,0,1,0))
 
 plot (unite_corr, cex = .05, main = "#UniteTheRight Topic Correlations") 
 
-#Visualize 
-#reset par mfrow
-par(mfrow=c(1,1))    
-
-plot.STM(unite_fit,type="summary", xlim=c(0, .3))
-#just top 20 
-plot.STM(unite_fit,type="summary", xlim=c(0, .3), ylim=c(60,80))
-
-
 ##########
 #Understand 
 #########
-#STM lets us do a couple of things: 
-#1: display words associated with topics 
-
-#labelTopics 
-labelTopics (unite_fit2)
-
-#plot topic model 
-plot.STM(unite_fit2,type="summary", xlim=c(0, .3))
-#For paper, just top 10 
-plot.STM(unite_fit2,type="summary", xlim=c(0, .3), ylim=c(40,50))
 
 #convert to dataframe and export to csv 
-k50_unite_right <- make.dt(unite_fit2)
-write.csv(k50_unite_right, "topicModelresults_unite_right_K50_7_9_18.csv")
+k74_unite_right <- make.dt(unite_fit2)
+write.csv(k74_unite_right, "topicModelresults_unite_right_K74.csv")
 
 #show the topics that proportionally make up the most of the corpus
-#cville first 
+#unite first 
 par(mfrow = c(1,2), mar=c(.5, .5, 1, .5))
-model2_unite_thoughts37 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=37, n=3)
 model2_unite_thoughts54 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=54, n=2)
-model2_unite_thoughts30 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=30, n=2)
-plotQuote(model2_unite_thoughts37$docs[[1]], main = "#UniteTheRight Topic 37")
+model2_unite_thoughts55 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=55, n=2)
+model2_unite_thoughts43 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=43, n=2)
+model2_unite_thoughts35 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=35, n=2)
+model2_unite_thoughts20 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=20, n=2)
+model2_unite_thoughts73 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=73, n=2)
+model2_unite_thoughts53 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=53, n=2)
+model2_unite_thoughts59 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=59, n=2)
+model2_unite_thoughts61 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=61, n=2)
+model2_unite_thoughts56 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=56, n=2)
+
 plotQuote(model2_unite_thoughts54$docs[[1]], main = "#UniteTheRight Topic 54")
-plotQuote(model2_unite_thoughts30$docs[[1]], main = "#UniteTheRight Topic 30")
+plotQuote(model2_unite_thoughts55$docs[[1]], main = "#UniteTheRight Topic 55")
+plotQuote(model2_unite_thoughts43$docs[[1]], main = "#UniteTheRight Topic 43")
+plotQuote(model2_unite_thoughts35$docs[[1]], main = "#UniteTheRight Topic 35")
+plotQuote(model2_unite_thoughts20$docs[[1]], main = "#UniteTheRight Topic 20")
+plotQuote(model2_unite_thoughts73$docs[[1]], main = "#UniteTheRight Topic 73")
+plotQuote(model2_unite_thoughts53$docs[[1]], main = "#UniteTheRight Topic 53")
+plotQuote(model2_unite_thoughts59$docs[[1]], main = "#UniteTheRight Topic 59")
+plotQuote(model2_unite_thoughts61$docs[[1]], main = "#UniteTheRight Topic 61")
+plotQuote(model2_unite_thoughts56$docs[[1]], main = "#UniteTheRight Topic 56")
 
 #plot word clouds with sample tweets
 par(mfrow = c(1,2), mar=c(.5, .5, 1, .5))
