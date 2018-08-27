@@ -4,7 +4,7 @@
 rm(list=ls())
 
 setwd ("~/Dropbox/blm_tweets/")
-load("~/Dropbox/blm_tweets/stm_analysis_7.11.18.RData")
+load("~/Dropbox/blm_tweets/asw_analysis.RData")
 library(streamR)
 library (tidyverse)
 library(stm)
@@ -52,6 +52,8 @@ unite_processed <- textProcessor(unite_analysis$stripped_text, metadata = unite_
 
 #prepare
 unite_out <- prepDocuments(unite_processed$documents, unite_processed$vocab, unite_processed$meta)
+
+out <- unite_out
 #Removing 5729 of 12102 terms (5729 of 578582 tokens) due to frequency  
 #Removing 202 Documents with No Words 
 #Your corpus now has 76016 documents, 6373 terms and 572853 tokens.
@@ -160,13 +162,19 @@ plot.STM(unite_fit2,type="summary", xlim=c(0, .3), ylim=c(1,23))
 
 #effect of verified users
 #number of simulations default = 25 
-prep <- estimateEffect(c(54, 55, 43) ~ verified, unite_fit2, meta = unite_meta, uncertainty = "Global")
+#try devtools::install_github('methodds/stminsights')
+#run_stminsights()
+prep_all <- estimateEffect(1:74 ~ verified + created_at, unite_fit2, meta = unite_meta, uncertainty = "Global")
+prep <- estimateEffect(c(54, 55, 43) ~ verified + created_at, unite_fit2, meta = unite_meta, uncertainty = "Global")
 summary(prep)
+#in below plot, time created at is kept  at the median 
+summary(unite_meta$created_at)
+#"2017-08-13 23:28:53"
+
 plot(prep, "verified", model=unite_fit2, method="pointestimate",
      width = 5, main ="Estimated effect of verified users & time of tweet")
 
-
-prep2 <- estimateEffect(c(35, 20, 73) ~ verified, unite_fit2, meta = unite_meta, uncertainty = "Global")
+prep2 <- estimateEffect(c(35, 20, 73) ~ verified + created, unite_fit2, meta = unite_meta, uncertainty = "Global")
 summary(prep2)
 plot(prep2, "verified", model=unite_fit2, method="pointestimate",
      width = 10, main ="Estimated effect of verified users & time of tweet")
@@ -426,6 +434,9 @@ prep <- estimateEffect(1:20 ~ rating + s(day), poliblogPrevFit,
                        + meta = out$meta, uncertainty = "Global")
 summary(prep, topics=1)
 
+#use stm insights to visualize 
+library(stminsights)
+run_stminsights()
 
 #####################
 #word network 
