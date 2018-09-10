@@ -486,8 +486,38 @@ climate_words_counts %>%
 ####################
 #sentiment analysis of unite_right
 ####################
+library(sentimentr)
+unite_analysis
 
+#must use get_sentences for workflow QC
+mysentences <- get_sentences(unite_analysis$text)
+sentiment(mysentences)
 
+# group_by
+
+#convert verified to false = 0, true = 1 in unite_analysis
+unite_analysis$verified [unite_analysis$verified == "TRUE"] <- 1
+unite_analysis$verified [unite_analysis$verified == "FALSE"] <- 0
+unite_analysis$verified <- as.integer(unite_analysis$verified)
+head(unite_analysis$verified)
+table(unite_analysis$verified)
+
+#unite_analysis$created_at
+head(unite_analysis$created_at)
+
+unite_analysis$created_at <- as.POSIXct(unite_analysis$created_at, format = "%a %b %d %H:%M:%S +0000 %Y")
+
+(sentiment_out <- with(
+  unite_analysis, 
+  sentiment_by(
+    get_sentences(text), 
+    list(verified, created_at)
+  )
+))
+
+plot(sentiment_out)
+
+#i need to chunk timw within the 24 hours, so as to make plot more legible 
 
 #####################
 #
