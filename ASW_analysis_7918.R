@@ -483,6 +483,12 @@ climate_words_counts %>%
        subtitle = "Text mining twitter data ",
        x = "", y = "")
 
+####################
+#sentiment analysis of unite_right
+####################
+
+
+
 #####################
 #
 #then #charlottesville
