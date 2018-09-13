@@ -506,6 +506,18 @@ table(unite_analysis$verified)
 head(unite_analysis$created_at)
 
 unite_analysis$created_at <- as.POSIXct(unite_analysis$created_at, format = "%a %b %d %H:%M:%S +0000 %Y")
+unite_analysis$hour <- as.POSIXlt(unite_analysis$created_at)$hour
+aggregate(.~hour,data=unite_analysis,sum)
+
+names(unite_analysis)
+library(lubridate)
+library(magrittr)
+library(tidyverse)
+unite_analysis %>%
+  mutate(created_at = as.POSIXct(created_at)) %>%
+  group_by(lubridate::hour(created_at), text) %>%
+  summarise(count=n()) %>%
+  arrange(desc(count))
 
 (sentiment_out <- with(
   unite_analysis, 
@@ -517,8 +529,29 @@ unite_analysis$created_at <- as.POSIXct(unite_analysis$created_at, format = "%a 
 
 plot(sentiment_out)
 
-#i need to chunk timw within the 24 hours, so as to make plot more legible 
+#I need to chunk time within the 24 hours, so as to make plot more legible 
+library(ggplot2)
+library(lubridate)
+library(scales)
+library(tm)
+library(stringr)
+library(wordcloud)
+library(syuzhet)
+library(reshape2)
+library(dplyr)
+library(twitteR)
 
+#extract days
+unite_analysis$timeonly <- as.numeric(unite_analysis$created_at - trunc(unite_analysis$created_at, "days"))
+class(unite_analysis$timeonly) <- "POSIXct"
+
+ggplot(data = unite_analysis, aes(x = timeonly)) +
+  geom_histogram(aes(fill = ..count..)) +
+  theme(legend.position = "none") +
+  xlab("Time") + ylab("Number of tweets") + 
+  scale_x_datetime(breaks = date_breaks("2 hours"), 
+                   labels = date_format("%H:00")) +
+  scale_fill_gradient(low = "midnightblue", high = "aquamarine4")
 #####################
 #
 #then #charlottesville
