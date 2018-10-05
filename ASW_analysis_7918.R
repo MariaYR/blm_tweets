@@ -114,6 +114,10 @@ hist(unite_meta$created_at, breaks ="min", freq = TRUE,
      ylab = "Number of Tweets", xlab = "Time", 
      main = "Frequency of #UniteTheRight Tweets")
 
+#number of unique users
+unique(unite_meta$screen_name)
+
+
 #unite_fit2 will use k=74 from above, but addes whether user is verified and time
 #as covariates 
 head(unite_meta$created_at)
