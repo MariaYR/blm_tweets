@@ -71,6 +71,53 @@ head(d)
 # Plot the table above for the top 20
 barplot(head(d$Tweets, 20), names=head(d$User, 20), horiz=T, las=1, main="Top 20 #UniteTheRight Tweeters: Tweets per User", col=1)
 
+#plot number of verified users
+table(unite_analysis$verified)
+
+v <- as.data.frame(table(unite_analysis$verified))
+names(v) <- c("Verified","Count")
+head(v) # 1 = verified 
+t <-ggplot(v, aes(Verified, Count))
+t +geom_bar(stat = "identity")   
+
+
+
+#######################
+#botornot
+#Twitter API limits to 180 hits per 15 minutes. specificy fast=TRUE
+
+devtools::install_github("mkearney/tweetbotornot")
+library(tweetbotornot)
+
+library(rtweet)
+library(httpuv)
+
+## autheticate via web browser
+token <- create_token(
+  app = "JumpingJellies",
+  consumer_key = "hD6UzoR5vmfHlMRfp5SG4ZyRA",
+  consumer_secret = "ZkhKaPc3YNJSW4xFhHUx3Sjd6hLuwkx5YTYUAaJTVNYpJvV27p")
+
+
+users <- unique(unite_analysis$screen_name)
+users
+
+# get bot probability estimates
+data <- botornot(users, fast=TRUE)
+
+# hash the usernames
+data$user_hash <- md5(data$user)
+
+# arrange by prob ests
+data %>% 
+  arrange(desc(prob_bot)) %>% 
+  select(-user)
+
+#plot verified users 
+unite_analysis %>%
+  
+###########
+
 #begin STM 
 unite_processed <- textProcessor(unite_analysis$stripped_text, metadata = unite_analysis)
 
@@ -221,6 +268,22 @@ plot(prep4, "verified", model=unite_fit2, method="pointestimate",
 #54, 55, 43, 35, 20, 73, 53, 59, 61, 56
 prep_top <- estimateEffect(c(54, 55, 43, 35, 20, 73, 53, 59, 61, 56) ~ verified + created_at, unite_fit2, meta = unite_meta, uncertainty = "Global")
 summary(prep_top)
+
+#nodal topics
+par(mfrow = c(1,1))
+
+prep5 <- estimateEffect(c(38, 46, 64) ~ verified, unite_fit2, meta = unite_meta, uncertainty = "Global")
+summary(prep5)
+plot(prep5, "verified", model=unite_fit2, method="pointestimate",
+     width = 10, main ="Estimated effect of verified users & time of tweet: Nodal Topics")
+
+plot(prep5, covariate = "verified", topics = c(38, 46, 64),
+     model = unite_fit2, method = "difference",
+     cov.value1 = "0", cov.value2 = "1",
+     xlab = "Non-Verified .... Verified",
+     main = "Effect of Non-Verified Vs Verified Users",
+     xlim = c(-.1, .1), labeltype = "custom",
+     custom.labels = c('Topic 38', 'Topic 46','Topic 64'))
 ####################
 #> summary(prep_top)
 
@@ -408,6 +471,67 @@ plot (unite_corr, cex = .05, main = "#UniteTheRight Topic Correlations")
 #convert to dataframe and export to csv 
 k74_unite_right <- make.dt(unite_fit2)
 write.csv(k74_unite_right, "topicModelresults_unite_right_K74.csv")
+
+#wordcloud of top 3 proportional topics 
+
+model2_unite_thoughts63 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=63, n=2)
+model2_unite_thoughts50 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=50, n=2)
+model2_unite_thoughts68 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=68, n=2)
+plotQuote(model2_unite_thoughts63$docs[[1]], main = "#UniteTheRight Topic 63")
+plotQuote(model2_unite_thoughts50$docs[[1]], main = "#UniteTheRight Topic 50")
+plotQuote(model2_unite_thoughts68$docs[[1]], main = "#UniteTheRight Topic 68")
+
+par(mfrow = c(1,2), mar=c(.5, .5, 1, .5))
+layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
+
+
+plotQuote(model2_unite_thoughts63$docs[[1]], main = "Topic 63")
+cloud(unite_fit2, topic = 63, scale = c(2, .25))
+
+plotQuote(model2_unite_thoughts50$docs[[1]], main = "Topic 50")
+cloud(unite_fit2, topic = 50, scale = c(2, .25))
+
+plotQuote(model2_unite_thoughts68$docs[[1]], main = "Topic 68")
+cloud(unite_fit2, topic = 68, scale = c(2, .25))
+
+#plot hihgly correlated topic cluster
+model2_unite_thoughts46 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=46, n=2)
+model2_unite_thoughts09 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=09, n=2)
+model2_unite_thoughts23 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=23, n=2)
+plotQuote(model2_unite_thoughts46$docs[[1]], main = "#UniteTheRight Topic 46")
+plotQuote(model2_unite_thoughts09$docs[[1]], main = "#UniteTheRight Topic 09")
+plotQuote(model2_unite_thoughts23$docs[[1]], main = "#UniteTheRight Topic 23")
+
+plotQuote(model2_unite_thoughts48$docs[[1]], main = "Topic 48")
+cloud(unite_fit2, topic = 48, scale = c(2, .25))
+
+plotQuote(model2_unite_thoughts09$docs[[1]], main = "Topic 09")
+cloud(unite_fit2, topic = 09, scale = c(2, .25))
+
+plotQuote(model2_unite_thoughts23$docs[[1]], main = "Topic 23")
+cloud(unite_fit2, topic = 23, scale = c(2, .25))
+
+#next cluster, 64 and 24
+model2_unite_thoughts64 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=64, n=2)
+model2_unite_thoughts24 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=24, n=2)
+plotQuote(model2_unite_thoughts64$docs[[1]], main = "#UniteTheRight Topic 64")
+plotQuote(model2_unite_thoughts24$docs[[1]], main = "#UniteTheRight Topic 24")
+
+plotQuote(model2_unite_thoughts64$docs[[1]], main = "Topic 64")
+cloud(unite_fit2, topic = 64, scale = c(2, .25))
+
+plotQuote(model2_unite_thoughts24$docs[[1]], main = "Topic 24")
+cloud(unite_fit2, topic = 24, scale = c(2, .25))
+
+#nodal topic 74 
+model2_unite_thoughts74 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=74, n=2)
+plotQuote(model2_unite_thoughts74$docs[[1]], main = "Topic 74")
+cloud(unite_fit2, topic = 74, scale = c(2, .25))
+
+#nodal topic 38 
+model2_unite_thoughts38 <- findThoughts(unite_fit2, texts=unite_meta$text, topics=38, n=2)
+plotQuote(model2_unite_thoughts38$docs[[1]], main = "Topic 38")
+cloud(unite_fit2, topic = 38, scale = c(2, .25))
 
 #show the topics that proportionally make up the most of the corpus
 #unite first 
