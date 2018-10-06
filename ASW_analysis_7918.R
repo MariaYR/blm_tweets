@@ -514,6 +514,73 @@ climate_words_counts %>%
 ####################
 #sentiment analysis of unite_right
 ####################
+install.packages("httr", repos = "http://cran.us.r-project.org")
+install.packages("syuzhet", repos = "http://cran.us.r-project.org")
+# Load the required Packages
+library(twitteR)
+library(RCurl)
+library(httr)
+library(tm)
+library(wordcloud)
+library(syuzhet)
+
+# Emotions for each tweet using NRC dictionary
+emotions <- get_nrc_sentiment(unite_analysis$text)
+emo_bar = colSums(emotions)
+emo_sum = data.frame(count=emo_bar, emotion=names(emo_bar))
+emo_sum$emotion = factor(emo_sum$emotion, levels=emo_sum$emotion[order(emo_sum$count, decreasing = TRUE)])
+
+# Visualize the emotions from NRC sentiments
+install.packages("plotly")
+library(plotly)
+p <- plot_ly(emo_sum, x=~emotion, y=~count, type="bar", color=~emotion) %>%
+  layout(xaxis=list(title=""), showlegend=FALSE,
+         title="Emotion Type for hashtag: #UniteTheRight")
+p
+#api_create(p,filename="Sentimentanalysis") #publishes chart to plotly
+#see https://plot.ly/r/getting-started/
+
+# Create comparison word cloud data
+
+wordcloud_tweet = c(
+  paste(unite_analysis$text[emotions$anger > 0], collapse=" "),
+  paste(unite_analysis$text[emotions$anticipation > 0], collapse=" "),
+  paste(unite_analysis$text[emotions$disgust > 0], collapse=" "),
+  paste(unite_analysis$text[emotions$fear > 0], collapse=" "),
+  paste(unite_analysis$text[emotions$joy > 0], collapse=" "),
+  paste(unite_analysis$text[emotions$sadness > 0], collapse=" "),
+  paste(unite_analysis$text[emotions$surprise > 0], collapse=" "),
+  paste(unite_analysis$text[emotions$trust > 0], collapse=" ")
+)
+
+# create corpus
+corpus = Corpus(VectorSource(wordcloud_tweet))
+
+# remove punctuation, convert every word in lower case and remove stop words
+
+corpus = tm_map(corpus, tolower)
+corpus = tm_map(corpus, removePunctuation)
+corpus = tm_map(corpus, removeWords, c(stopwords("english")))
+corpus = tm_map(corpus, stemDocument)
+
+# create document term matrix
+tdm = TermDocumentMatrix(corpus)
+
+# convert as matrix
+tdm = as.matrix(tdm)
+tdmnew <- tdm[nchar(rownames(tdm)) < 11,]
+
+# column name binding
+colnames(tdm) = c('anger', 'anticipation', 'disgust', 'fear', 'joy', 'sadness', 'surprise', 'trust')
+colnames(tdmnew) <- colnames(tdm)
+comparison.cloud(tdmnew, random.order=FALSE,
+                 colors = c("#00B2FF", "red", "#FF0099", "#6600CC", "green", "orange", "blue", "brown"),
+                 title.size=1, max.words=300, scale=c(2.5, 0.3),rot.per=0.3)
+
+#################
+#other sentinment analysis method
+#################
+
 library(sentimentr)
 unite_analysis
 
