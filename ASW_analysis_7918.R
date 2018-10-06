@@ -47,6 +47,30 @@ unite_analysis$stripped_text <- gsub("(RT|via)((?:\\b\\W*@\\w+)+)", "", unite_an
 #unite_analysis_test <- na.omit(unite_right_tweets)
 #removing na's results in only 232 observations. lets keep them and remove retweets instead 
 
+names(unite_analysis)
+
+#plot tweeter locations
+unite_analysis %>%
+  count(location, sort = TRUE) %>%
+  mutate(location = reorder(location,n)) %>%
+  na.omit() %>%
+  top_n(20) %>%
+  ggplot(aes(x = location,y = n)) +
+  geom_col() +
+  coord_flip() +
+  labs(x = "Location",
+       y = "Count",
+       title = "#UniteTheRight Tweeters - unique locations ")
+
+#plot most active tweeters
+d <- as.data.frame(table(unite_analysis$screen_name))
+d <- d[order(d$Freq, decreasing=T), ] #descending order of tweeters according to frequency of tweets
+names(d) <- c("User","Tweets")
+head(d)
+
+# Plot the table above for the top 20
+barplot(head(d$Tweets, 20), names=head(d$User, 20), horiz=T, las=1, main="Top 20 #UniteTheRight Tweeters: Tweets per User", col=1)
+
 #begin STM 
 unite_processed <- textProcessor(unite_analysis$stripped_text, metadata = unite_analysis)
 
