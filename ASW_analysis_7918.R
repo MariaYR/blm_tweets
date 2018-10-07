@@ -280,10 +280,23 @@ plot(prep5, "verified", model=unite_fit2, method="pointestimate",
 plot(prep5, covariate = "verified", topics = c(38, 46, 64),
      model = unite_fit2, method = "difference",
      cov.value1 = "0", cov.value2 = "1",
-     xlab = "Non-Verified .... Verified",
-     main = "Effect of Non-Verified Vs Verified Users",
+     xlab = "Unverified .... Verified",
+     main = "Effect of Unverified Vs Verified Users",
      xlim = c(-.1, .1), labeltype = "custom",
      custom.labels = c('Topic 38', 'Topic 46','Topic 64'))
+
+#topic 74
+prep6 <- estimateEffect(c(74) ~ verified, unite_fit2, meta = unite_meta, uncertainty = "Global")
+summary(prep6)
+plot(prep6, "verified", model=unite_fit2, method="pointestimate",
+     width = 10, main ="Estimated effect of verified users & time of tweet: Topic 74")
+plot(prep6, covariate = "verified", topics = 74,
+     model = unite_fit2, method = "difference",
+     cov.value1 = "0", cov.value2 = "1",
+     xlab = "Unverified .... Verified",
+     main = "Effect of Unverified Vs Verified Users: Topic 74",
+     xlim = c(-.1, .1), labeltype = "custom",
+     custom.labels = c('Topic 74'))
 ####################
 #> summary(prep_top)
 
@@ -502,8 +515,8 @@ plotQuote(model2_unite_thoughts46$docs[[1]], main = "#UniteTheRight Topic 46")
 plotQuote(model2_unite_thoughts09$docs[[1]], main = "#UniteTheRight Topic 09")
 plotQuote(model2_unite_thoughts23$docs[[1]], main = "#UniteTheRight Topic 23")
 
-plotQuote(model2_unite_thoughts48$docs[[1]], main = "Topic 48")
-cloud(unite_fit2, topic = 48, scale = c(2, .25))
+plotQuote(model2_unite_thoughts46$docs[[1]], main = "Topic 46")
+cloud(unite_fit2, topic = 46, scale = c(2, .25))
 
 plotQuote(model2_unite_thoughts09$docs[[1]], main = "Topic 09")
 cloud(unite_fit2, topic = 09, scale = c(2, .25))
@@ -569,8 +582,6 @@ cloud(unite_fit2, topic = 54, scale = c(2, .25))
 
 plotQuote(model2_unite_thoughts30$docs[[1]], main = "Topic 30")
 cloud(unite_fit2, topic = 30, scale = c(2, .25))
-
-#label topics 
 
 #plot number of topic
 unite_storage <- searchK(unite_out$documents, unite_out$vocab, K = c(10,20,30,40,50,60,70,80,90,100), data = meta) 
@@ -638,6 +649,7 @@ climate_words_counts %>%
 ####################
 #sentiment analysis of unite_right
 ####################
+
 install.packages("httr", repos = "http://cran.us.r-project.org")
 install.packages("syuzhet", repos = "http://cran.us.r-project.org")
 # Load the required Packages
@@ -771,6 +783,7 @@ ggplot(data = unite_analysis, aes(x = timeonly)) +
   scale_x_datetime(breaks = date_breaks("2 hours"), 
                    labels = date_format("%H:00")) +
   scale_fill_gradient(low = "midnightblue", high = "aquamarine4")
+
 #####################
 #
 #then #charlottesville
